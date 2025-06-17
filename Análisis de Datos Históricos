@@ -1,0 +1,102 @@
+#1
+
+import yfinance as yf
+
+tesla = yf.Ticker('TSLA')
+tesla_data = tesla.history(period='1y')
+tesla_data = tesla_data.reset_index()
+print(tesla_data.head())
+
+#2
+
+import requests
+from bs4 import BeautifulSoup
+import pandas as pd
+
+url = 'https://www.macrotrends.net/stocks/charts/TSLA/tesla/revenue'
+
+headers = {'User-Agent': 'Mozilla/5.0'}
+r = requests.get(url, headers=headers)
+soup = BeautifulSoup(r.text, 'html.parser')
+
+tables = soup.find_all('table', class_='historical_data_table table')
+
+for table in tables:
+    if 'Tesla Quarterly Revenue' in table.text:
+        revenue_table = table
+        break
+
+if 'revenue_table' not in locals():
+    raise Exception("No se encontró la tabla de ingresos de Tesla.")
+
+rows = revenue_table.find_all('tr')
+
+data = []
+for row in rows:
+    cols = row.find_all('td')
+    if len(cols) == 2:
+        date = cols[0].text.strip()
+        revenue = cols[1].text.strip().replace('$', '').replace(',', '')
+        if revenue != '':
+            data.append([date, float(revenue)])
+
+tesla_revenue = pd.DataFrame(data, columns=['Date', 'Revenue'])
+
+print(tesla_revenue.tail())
+
+# 3
+import yfinance as yf
+
+gme = yf.Ticker('GME')
+
+gme_data = gme.history(period='1y')
+
+gme_data = gme_data.reset_index()
+
+print(gme_data.head())
+
+#4 
+import yfinance as yf
+
+gme = yf.Ticker("GME")
+
+gme_revenue = gme.financials
+
+print(gme_revenue.tail())
+
+
+#5
+import yfinance as yf
+import matplotlib.pyplot as plt
+
+def make_graph(data, title):
+    plt.figure(figsize=(10,6))
+    plt.plot(data.index, data['Close'], label='Tesla Close Price', color='red')
+    plt.title(title)
+    plt.xlabel('Fecha')
+    plt.ylabel('Precio (USD)')
+    plt.legend()
+    plt.grid(True)
+    plt.show()
+
+tesla_2025 = yf.download('TSLA', start='2025-01-01', end='2025-12-31')
+
+make_graph(tesla_2025, 'Precio de cierre de acciones de Tesla en 2025')
+
+#6
+import yfinance as yf
+import matplotlib.pyplot as plt
+
+def make_graph(data, title):
+    plt.figure(figsize=(10,6))
+    plt.plot(data.index, data['Close'], label='Tesla Close Price', color='red')
+    plt.title(title)
+    plt.xlabel('Fecha')
+    plt.ylabel('Precio (USD)')
+    plt.legend()
+    plt.grid(True)
+    plt.show()
+
+Gamestop_2025 = yf.download('GME', start='2025-01-01', end='2025-12-31')
+
+make_graph(Gamestop_2025, 'Precio de cierre de acciones de Tesla en 2025')
